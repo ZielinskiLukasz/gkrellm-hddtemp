@@ -5,10 +5,10 @@ CFLAGS=-Wall -fPIC -O2
 LDFLAGS=-Wl,-s
 
 all:
-	@echo 
+	@echo
 	@echo "Type 'make gkrellm1' and then 'make install1'"
 	@echo "  or 'make gkrellm2' and then 'make install2'"
-	@echo 
+	@echo
 
 gkrellm1: $(OBJS)
 	$(CC) $(CFLAGS) `gtk-config --cflags` `imlib-config --cflags-gdk` -I. -c gkrellm-hddtemp.c
@@ -17,7 +17,7 @@ gkrellm1: $(OBJS)
 
 gkrellm2: $(OBJS)
 	$(CC) $(CFLAGS) -DGKRELLM2 `pkg-config --cflags gtk+-2.0` -I. -c gkrellm-hddtemp.c
-	$(CC) -shared -Wl -o gkrellm-hddtemp.so gkrellm-hddtemp.o
+	$(CC) -shared -o gkrellm-hddtemp.so gkrellm-hddtemp.o
 	rm gkrellm-hddtemp.o
 
 clean:

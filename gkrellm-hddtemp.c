@@ -1,6 +1,7 @@
 /* Hard disk drive temperature plugin for Gkrellm
  *
  * Copyright (C) 2001  Emmanuel VARAGNAT <coredump@free.fr>
+ * Copyright (C) 2017  Simon Descarpentries <sdescarpentries@april.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +30,6 @@
 #include <string.h>
 #include <wait.h>
 #include <sys/ipc.h>
-#include <errno.h>
 #include <sys/socket.h>
 #include <errno.h>
 #include <netinet/in.h>
@@ -71,7 +71,7 @@ typedef struct {
   char *value;
   char *unit;
 } DriveInfos;
-  
+
 typedef struct {
   int   code;      /* 0 for no error */
   char  msg[255];
@@ -130,7 +130,7 @@ char *parse_next(char *start, char separator, DriveInfos *infos) {
   return start;
 }
 
-char * query_hddtemp_deamon(const char * server, unsigned int port) {
+char * query_hddtemp_daemon(const char * server, unsigned int port) {
   struct sockaddr_in  saddr;
   struct hostent      *he;
   int                 sk;
@@ -145,7 +145,7 @@ char * query_hddtemp_deamon(const char * server, unsigned int port) {
     perror("gkrellm-hddtemp: socket");
     return NULL;
   }
-  
+
   memset(&saddr, 0, sizeof(struct sockaddr_in));
   if((he = gethostbyname(serv_name)) == NULL) {
     perror("gkrellm-hddtemp: gethostbyaddr");
@@ -183,7 +183,7 @@ char * query_hddtemp_deamon(const char * server, unsigned int port) {
     strncpy(str+pos, buff, n);
     pos += n;
   }
-  str[pos] = '\0';  
+  str[pos] = '\0';
 
   close(sk);
 
@@ -205,7 +205,7 @@ static void update_plugin() {
       return;
     }
 
-    reply = query_hddtemp_deamon("127.0.0.1", 7634);    
+    reply = query_hddtemp_daemon("127.0.0.1", 7634);
 
     if(reply) {
       sep = reply[0];
@@ -228,7 +228,7 @@ static void update_plugin() {
 	gkrellm_draw_decal_text(drives[i].panel, drives[i].d_degree, "°", -1);
 	gkrellm_draw_decal_text(drives[i].panel, drives[i].d_unit, infos.unit, -1);
       }
-      
+
       gkrellm_draw_panel_layers(drives[i].panel);
     }
 
@@ -262,8 +262,8 @@ static void create_plugin(GtkWidget *vbox, gint first_create) {
   char *reply;
   char sep;
   unsigned int i, len;
-  
-  reply = query_hddtemp_deamon("127.0.0.1", 7634);
+
+  reply = query_hddtemp_daemon("127.0.0.1", 7634);
 
   /* ERROR */
   if(reply == NULL) {
@@ -273,7 +273,7 @@ static void create_plugin(GtkWidget *vbox, gint first_create) {
     error.panel = gkrellm_panel_new0();
 
     style = gkrellm_meter_style(style_id);
-    
+
     hdd_extents.ts = *gkrellm_meter_textstyle(style_id);
 #ifdef GKRELLM2
     hdd_extents.ts.font = gkrellm_default_font(0);
@@ -282,7 +282,7 @@ static void create_plugin(GtkWidget *vbox, gint first_create) {
 #endif
     string_extents("ERROR", &hdd_extents);
     error.decal = gkrellm_create_decal_text(error.panel, "ERROR", &hdd_extents.ts,
-					    style, 0, -1, 0);    
+					    style, 0, -1, 0);
     /*
     error.decal->x = (panel->h - decal->h) / 2;
     error.decal->y = (panel->w - decal->w) / 2;
@@ -324,12 +324,12 @@ static void create_plugin(GtkWidget *vbox, gint first_create) {
   drives = NULL;
   if(nb_drives)
     drives = (Drive*)malloc(nb_drives * sizeof(Drive));
-  
+
   if(drives == NULL) {
     perror("gkrellm-hddtemp: allocation error:");
     exit(1);
   }
-  
+
   for(i = 0; i < nb_drives; i++) {
     drives[i].panel  = NULL;
     drives[i].d_hdd  = NULL;
@@ -338,7 +338,7 @@ static void create_plugin(GtkWidget *vbox, gint first_create) {
 
   /* init styles and fonts */
   style = gkrellm_meter_style(style_id);
-    
+
   hdd_extents.ts = *gkrellm_meter_textstyle(style_id);
 #ifdef GKRELLM2
   hdd_extents.ts.font = gkrellm_default_font(0);
@@ -349,19 +349,19 @@ static void create_plugin(GtkWidget *vbox, gint first_create) {
 
   temp_extents.ts = *gkrellm_meter_alt_textstyle(style_id);
 #ifdef GKRELLM2
-  temp_extents.ts.font = gkrellm_default_font(2);
+  temp_extents.ts.font = gkrellm_default_font(1);
 #else
   temp_extents.ts.font = GK.large_font;
 #endif
-  string_extents("88", &temp_extents);    
+  string_extents("88", &temp_extents);
 
   unit_extents.ts = *gkrellm_meter_alt_textstyle(style_id);
 #ifdef GKRELLM2
-  unit_extents.ts.font = gkrellm_default_font(0);
+  unit_extents.ts.font = gkrellm_default_font(1);
 #else
   unit_extents.ts.font = GK.small_font;
 #endif
-  string_extents("W", &unit_extents);    
+  string_extents("W", &unit_extents);
 
   degree_extents.ts = *gkrellm_meter_alt_textstyle(style_id);
 #ifdef GKRELLM2
@@ -369,7 +369,7 @@ static void create_plugin(GtkWidget *vbox, gint first_create) {
 #else
   degree_extents.ts.font = GK.small_font;
 #endif
-  string_extents("°", &degree_extents);    
+  string_extents("°", &degree_extents);
 
 
   /* create and initialize each panel */
@@ -399,8 +399,8 @@ static void create_plugin(GtkWidget *vbox, gint first_create) {
 
     drives[i].d_degree->x = drives[i].d_temp->x + drives[i].d_temp->w + 1;
     drives[i].d_unit->x = drives[i].d_degree->x + drives[i].d_degree->w;
-    drives[i].d_degree->y = drives[i].d_temp->y - 1;
-    drives[i].d_unit->y = drives[i].d_temp->y + drives[i].d_temp->h - drives[i].d_unit->h;    
+    drives[i].d_degree->y = drives[i].d_temp->y;
+    drives[i].d_unit->y = drives[i].d_temp->y + drives[i].d_temp->h - drives[i].d_unit->h - 1;
 
     /* creation */
     gkrellm_panel_configure(drives[i].panel, NULL, style);
@@ -415,9 +415,9 @@ static void create_plugin(GtkWidget *vbox, gint first_create) {
 
 
 static void config_plugin(GtkWidget *vbox) {
-  gtk_box_pack_start(GTK_BOX(vbox), gtk_label_new("Gkrellm plugin for hddtemp (v0.2)\n\n"
-						  "contact me: coredump@free.fr\n"
-						  "website: http://coredump.free.fr/linux"), TRUE, TRUE, 0);
+  gtk_box_pack_start(GTK_BOX(vbox), gtk_label_new("Gkrellm plugin for hddtemp (v0.2.1)\n\n"
+	"https://github.com/Siltaar/gkrellm-hddtemp\n\n"
+	"based on original work from http://www.guzu.net/linux/hddtemp.php\n"), TRUE, TRUE, 0);
 }
 
 
@@ -428,17 +428,17 @@ static GkrellmMonitor	plugin_mon = {
   update_plugin,     /* The update function      */
   config_plugin,     /* The config tab create function   */
   NULL,		     /* Apply the config function        */
-  
+
   NULL,		     /* Save user config */
   NULL,		     /* Load user config */
   NULL,		     /* config keyword   */
-  
+
   NULL,		      /* Undefined 2	*/
   NULL,		      /* Undefined 1	*/
   NULL,		      /* private	*/
-  
+
   MON_DISK,	      /* Insert plugin before this monitor	*/
-  
+
   NULL,		      /* Handle if a plugin, filled in by GKrellM     */
   NULL		      /* path if a plugin, filled in by GKrellM       */
 };
