@@ -10,7 +10,9 @@ Just type `make gkrellm2 && make install2` to use with current gkrellm2.
 Respective `gkrellm1` and `install1` makefile targets are provided for legacy purpose.
 
 Before starting `gkrellm`, you must start `hddtemp` (version >= 0.3) in daemon mode.
-This is automatically handled in Debian stable (Jessie) while installing `hddtemp`.
+This is automatically handled in Debian stable (Jessie) if `hddtemp` is intalled and you edit the following in `/etc/default/hddtemp`:
+
+`RUN_DAEMON="true"`
 
 For the moment gkrellm-hddtemp isn't able to connect to a distant host.
 
