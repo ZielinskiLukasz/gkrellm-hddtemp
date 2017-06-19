@@ -1,7 +1,7 @@
-
-LICENCE
+WARNING
 =======
-Software under GLPv2 licence. See LICENCE file for more information.
+
+The `hddtemp` sensor is now integrated into gkrellm2, and will appear among other sensors as soon as you'll have properly setup the `hddtemp` daemon as explain in the following part.
 
 
 INSTALLATION
@@ -21,4 +21,9 @@ CONTACT
 =======
 - Branch maintainer : Simon Descarpentries <sdescarpentries à april.org>
 - Original developper : Emmanuel Varagnat <coredump à free.fr>,  <emmanuel.varagnat à free.fr>
+
+
+LICENCE
+=======
+Software under GLPv2 licence. See LICENCE file for more information.
 
